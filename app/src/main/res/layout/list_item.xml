@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardCornerRadius="5dp"
+    android:elevation="5dp"
+    android:layout_margin="10dp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/primaryColor"
+        android:padding="10dp">
+
+
+
+        <TextView
+            android:id="@+id/tvItemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Item Name"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            android:layout_marginLeft="20dp"/>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            >
+            <TextView
+                android:id="@+id/tvQty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="QTY: "
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white"
+                android:layout_marginLeft="20dp"/>
+
+            <TextView
+                android:id="@+id/tvPrice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Price: "
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white"
+                android:layout_marginLeft="20dp"/>
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            >
+            <TextView
+                android:id="@+id/tvType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Payment Via: "
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white"
+                android:layout_marginLeft="20dp"/>
+
+            <TextView
+                android:id="@+id/tvBalance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Balance: "
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white"
+                android:layout_marginLeft="20dp"/>
+
+        </LinearLayout>
+
+
+
+
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>

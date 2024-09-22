@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Cafeteria Cashier</string>
+
+    <string name="splash_text">RFID Based Prepaid Card for Cafeteria Cashier System</string>
+</resources>
