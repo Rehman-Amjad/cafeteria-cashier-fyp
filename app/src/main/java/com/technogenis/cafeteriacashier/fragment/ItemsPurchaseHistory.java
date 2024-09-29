@@ -1,83 +1,83 @@
-package com.technogenis.cafeteriacashier;
+package com.technogenis.cafeteriacashier.fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.ChildEventListener;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.technogenis.cafeteriacashier.MyPreferenceManager;
+import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.adapter.HistoryAdapter;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
 
+public class ItemsPurchaseHistory extends Fragment {
 
-    TextView tvItemName,tvQty,tvPrice,tvType,tvBalance;
-
-    private  MyPreferenceManager preferenceManager;
+    private MyPreferenceManager preferenceManager;
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private HistoryAdapter mHistoryAdapter;
-    private List<HistoryModel> mDataList = new ArrayList<>();
+    private final List<HistoryModel> mDataList = new ArrayList<>();
     private DatabaseReference historyRef;
     private HistoryModel lastHistoryItem;
+
+    TextView tvTotal;
+
+    int totalPrice = 0;
 
     String rfid;
 
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        // Initialize Firebase database reference
+        historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_items_purchase_history, container, false);
 
-        preferenceManager = MyPreferenceManager.getInstance(this);
+        preferenceManager = MyPreferenceManager.getInstance(getActivity());
         rfid = preferenceManager.getString("rfid");
-        historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
 
-        initUI();
+        initUI(view);
         setupFirebaseListener();
 
+        return view;
     }
 
-    private void initUI() {
-        recyclerView =findViewById(R.id.recyclerView);
-        progressBar = findViewById(R.id.progressBar);
+    private void initUI(View view) {
+        recyclerView =view.findViewById(R.id.recyclerView);
+        progressBar = view.findViewById(R.id.progressBar);
+        tvTotal = view.findViewById(R.id.tvTotal);
 
-        tvItemName=findViewById(R.id.tvItemName);
-        tvQty=findViewById(R.id.tvQty);
-        tvPrice=findViewById(R.id.tvPrice);
-        tvType=findViewById(R.id.tvType);
-        tvBalance=findViewById(R.id.tvBalance);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mHistoryAdapter = new HistoryAdapter(this, mDataList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mHistoryAdapter = new HistoryAdapter(getActivity(), mDataList);
         recyclerView.setAdapter(mHistoryAdapter);
     }
-
-
     private void setupFirebaseListener() {
         // Attach ValueEventListener to the reference
         historyRef.addValueEventListener(new ValueEventListener() {
@@ -86,31 +86,19 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // Clear the existing list before adding new items
                 mDataList.clear();
-                HistoryModel lastItem = null;
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HistoryModel history = snapshot.getValue(HistoryModel.class);
                     if (history != null) {
                         // Only add the item if it matches the RFID
                         if (history.getCustomerRfid().equals(rfid)) {
+                            totalPrice += Integer.parseInt(history.getItemPrice());
                             mDataList.add(history);
-                            lastItem = history;
                         }
                     }
                 }
 
-                // If we have a last item, store it in the global variable
-                if (lastItem != null) {
-                    lastHistoryItem = lastItem;
-                    tvItemName.setText(lastHistoryItem.getItemName());
-                    tvQty.setText("QTY: " + lastHistoryItem.getItemQty());
-                    tvPrice.setText("Price: RS " + lastHistoryItem.getItemPrice());
-                    tvType.setText("Type: " + lastHistoryItem.getCustomerPayment());
-                    tvBalance.setText("Balance: RS " + lastHistoryItem.getCustomerBalance());
-
-                    Log.d("LastItem", "Last item: " + lastHistoryItem.toString());
-                }
-
+                tvTotal.setText("PKR "+ totalPrice);
                 // Notify the adapter that data has changed
                 mHistoryAdapter.notifyDataSetChanged();
 
@@ -130,6 +118,4 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }

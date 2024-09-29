@@ -1,82 +1,64 @@
-package com.technogenis.cafeteriacashier;
+package com.technogenis.cafeteriacashier.fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.technogenis.cafeteriacashier.adapter.HistoryAdapter;
+import com.technogenis.cafeteriacashier.MyPreferenceManager;
+import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class HomeFragment extends Fragment {
 
 
     TextView tvItemName,tvQty,tvPrice,tvType,tvBalance;
-
-    private  MyPreferenceManager preferenceManager;
-
-    private RecyclerView recyclerView;
-    private ProgressBar progressBar;
-    private HistoryAdapter mHistoryAdapter;
-    private List<HistoryModel> mDataList = new ArrayList<>();
     private DatabaseReference historyRef;
+
+    private MyPreferenceManager preferenceManager;
     private HistoryModel lastHistoryItem;
 
     String rfid;
 
-
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        preferenceManager = MyPreferenceManager.getInstance(this);
-        rfid = preferenceManager.getString("rfid");
         historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
+        preferenceManager = MyPreferenceManager.getInstance(getActivity());
+        rfid = preferenceManager.getString("rfid");
 
-        initUI();
-        setupFirebaseListener();
+        initView(view);
 
+       setupFirebaseListener();
+
+
+
+        return view;
     }
 
-    private void initUI() {
-        recyclerView =findViewById(R.id.recyclerView);
-        progressBar = findViewById(R.id.progressBar);
-
-        tvItemName=findViewById(R.id.tvItemName);
-        tvQty=findViewById(R.id.tvQty);
-        tvPrice=findViewById(R.id.tvPrice);
-        tvType=findViewById(R.id.tvType);
-        tvBalance=findViewById(R.id.tvBalance);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mHistoryAdapter = new HistoryAdapter(this, mDataList);
-        recyclerView.setAdapter(mHistoryAdapter);
+    private void initView(View view) {
+        tvItemName=view.findViewById(R.id.tvItemName);
+        tvQty=view.findViewById(R.id.tvQty);
+        tvPrice=view.findViewById(R.id.tvPrice);
+        tvType=view.findViewById(R.id.tvType);
+        tvBalance=view.findViewById(R.id.tvBalance);
     }
-
 
     private void setupFirebaseListener() {
         // Attach ValueEventListener to the reference
@@ -85,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // Clear the existing list before adding new items
-                mDataList.clear();
                 HistoryModel lastItem = null;
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -93,13 +74,12 @@ public class MainActivity extends AppCompatActivity {
                     if (history != null) {
                         // Only add the item if it matches the RFID
                         if (history.getCustomerRfid().equals(rfid)) {
-                            mDataList.add(history);
                             lastItem = history;
                         }
                     }
                 }
 
-                // If we have a last item, store it in the global variable
+//                 If we have a last item, store it in the global variable
                 if (lastItem != null) {
                     lastHistoryItem = lastItem;
                     tvItemName.setText(lastHistoryItem.getItemName());
@@ -110,26 +90,13 @@ public class MainActivity extends AppCompatActivity {
 
                     Log.d("LastItem", "Last item: " + lastHistoryItem.toString());
                 }
-
-                // Notify the adapter that data has changed
-                mHistoryAdapter.notifyDataSetChanged();
-
-                // Hide progress bar and show RecyclerView once data is loaded
-                if (progressBar.getVisibility() == View.VISIBLE) {
-                    progressBar.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle any errors if necessary
                 Log.e("FirebaseListener", "Database error: " + databaseError.getMessage());
-                progressBar.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
             }
         });
     }
-
-
 }

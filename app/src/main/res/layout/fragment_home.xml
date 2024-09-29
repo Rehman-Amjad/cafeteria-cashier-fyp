@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@color/white"
-    tools:context=".MainActivity">
-
-
+    tools:context=".fragment.HomeFragment">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -20,6 +16,7 @@
         android:layout_marginTop="30dp"
         android:layout_marginBottom="10dp"
         android:elevation="10dp"
+        app:cardCornerRadius="10dp"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -120,33 +117,26 @@
 
     </androidx.cardview.widget.CardView>
 
-    <View
+
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/primaryColor"
-        android:layout_margin="10dp"
+        android:layout_height="wrap_content"
+        android:text="Student Name: "
+       android:padding="8dp"
+        android:textSize="14sp"
+        android:textStyle="italic|bold"
+        android:textColor="@color/black"
         />
 
-    <RelativeLayout
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="10dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:text="Student Session: "
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:textStyle="italic|bold"
+        android:textColor="@color/black"
+        />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_centerInParent="true"
-            android:visibility="visible"/>
-
-    </RelativeLayout>
 
 </LinearLayout>

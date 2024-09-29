@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,10 +21,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.technogenis.cafeteriacashier.admin.AdminDashboardActivity;
 
 public class LoginActivity extends AppCompatActivity {
 
-    Button btnLogin;
+    Button btnLogin,btnAdmin;
     EditText etUserName,etUserPassword;
     String username, password;
     private MyPreferenceManager preferenceManager;
@@ -39,6 +41,37 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin=findViewById(R.id.btnLogin);
         etUserName=findViewById(R.id.etUserName);
         etUserPassword=findViewById(R.id.etUserPassword);
+        btnAdmin=findViewById(R.id.btnAdmin);
+
+        btnAdmin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username="admin";
+                String userpassword="admin";
+
+                if (username.equals(etUserName.getText().toString()))
+                {
+                    if (userpassword.equals(etUserPassword.getText().toString()))
+                    {
+                        Intent intent=new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else
+                    {
+                        etUserPassword.setError("incorrect Password");
+                        etUserPassword.requestFocus();
+                        etUserPassword.setText("");
+                    }
+                }
+                else
+                {
+                    etUserName.setError("incorrect username");
+                    etUserName.requestFocus();
+                    etUserName.setText("");
+                }
+            }
+        });
 
         btnLogin.setOnClickListener(v -> {
 

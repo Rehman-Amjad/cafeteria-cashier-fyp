@@ -13,7 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHolder>{
 
@@ -42,11 +45,12 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
         HistoryModel model = mDatalist.get(position);
 
 
-        holder.tvItemName.setText("Item Name: " + model.getItemname());
-        holder.tvQty.setText("QTY: " + model.getItemqty());
-        holder.tvPrice.setText("Price: RS " + model.getItemprice());
-        holder.tvType.setText("Type: " + model.getCustomerpayment());
-        holder.tvBalance.setText("Balance: RS " + model.getCustomerblance());
+        holder.tvItemName.setText(model.getItemName());
+        holder.tvQty.setText(model.getItemQty());
+        holder.tvPrice.setText(model.getItemPrice());
+        holder.tvDate.setText(convertTimestampToDateTime(model.getId()));
+
+//        holder.tvBalance.setText("Balance: RS " + model.getCustomerBalance());
 
 
     }
@@ -58,7 +62,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
 
     public static class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView tvItemName,tvQty,tvPrice,tvType,tvBalance;
+        TextView tvItemName,tvQty,tvPrice,tvDate;
 
 
         public MyViewHolder(@NonNull View itemView) {
@@ -67,8 +71,33 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.MyViewHo
             tvItemName=itemView.findViewById(R.id.tvItemName);
             tvQty=itemView.findViewById(R.id.tvQty);
             tvPrice=itemView.findViewById(R.id.tvPrice);
-            tvType=itemView.findViewById(R.id.tvType);
-            tvBalance=itemView.findViewById(R.id.tvBalance);
+            tvDate=itemView.findViewById(R.id.tvDate);
+//            tvBalance=itemView.findViewById(R.id.tvBalance);
+        }
+    }
+    public static String convertTimestampToDateTime(String timestamp) {
+        try {
+            // Convert the String timestamp to a long value
+            long timeInMillis = Long.parseLong(timestamp);
+
+            // Create a Date object from the timestamp
+            Date date = new Date(timeInMillis);
+
+            // Define the date and time format
+            SimpleDateFormat dateFormatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
+            SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm a", Locale.ENGLISH);
+
+            // Get the formatted date and time
+            String formattedDate = dateFormatter.format(date);
+            String formattedTime = timeFormatter.format(date);
+
+            // Return the combined result
+//            return formattedDate + " " + formattedTime;
+            return formattedDate;
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return "Invalid timestamp";
         }
     }
 }

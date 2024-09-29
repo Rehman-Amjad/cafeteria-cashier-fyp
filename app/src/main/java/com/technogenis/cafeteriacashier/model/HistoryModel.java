@@ -10,72 +10,75 @@ public class HistoryModel {
     String itemprice;
     String itemqty;
 
-    public HistoryModel(String id, String customerblance, String customerpayment, String customerrfid, String itemname, String itemprice, String itemqty) {
-        Id = id;
-        this.customerblance = customerblance;
-        this.customerpayment = customerpayment;
-        this.customerrfid = customerrfid;
-        this.itemname = itemname;
-        this.itemprice = itemprice;
+    // Constructor with parameters
+    public HistoryModel(String id, String customerBalance, String customerPayment, String customerRfid, String itemName, String itemPrice, String itemqty) {
+        this.Id = id;
+        this.customerblance = customerBalance;
+        this.customerpayment = customerPayment;
+        this.customerrfid = customerRfid;
+        this.itemname = itemName;
+        this.itemprice = itemPrice;
         this.itemqty = itemqty;
     }
 
+    // Default constructor
     public HistoryModel() {
     }
 
+    // Getters and Setters with default values for missing data
     public String getId() {
-        return Id;
+        return Id != null ? Id : "N/A"; // Return "N/A" if Id is null
     }
 
     public void setId(String id) {
-        Id = id;
+        this.Id = id;
     }
 
-    public String getCustomerblance() {
-        return customerblance;
+    public String getCustomerBalance() {
+        return customerblance != null ? customerblance : "0.00"; // Default to "0.00" if null
     }
 
-    public void setCustomerblance(String customerblance) {
-        this.customerblance = customerblance;
+    public void setCustomerBalance(String customerBalance) {
+        this.customerblance = customerBalance;
     }
 
-    public String getCustomerpayment() {
-        return customerpayment;
+    public String getCustomerPayment() {
+        return customerpayment != null ? customerpayment : "0.00"; // Default to "0.00" if null
     }
 
-    public void setCustomerpayment(String customerpayment) {
-        this.customerpayment = customerpayment;
+    public void setCustomerPayment(String customerPayment) {
+        this.customerpayment = customerPayment;
     }
 
-    public String getCustomerrfid() {
-        return customerrfid;
+    public String getCustomerRfid() {
+        return customerrfid != null ? customerrfid : "Unknown"; // Default to "Unknown" if null
     }
 
-    public void setCustomerrfid(String customerrfid) {
-        this.customerrfid = customerrfid;
+    public void setCustomerRfid(String customerRfid) {
+        this.customerrfid = customerRfid;
     }
 
-    public String getItemname() {
-        return itemname;
+    public String getItemName() {
+        return itemname != null ? itemname : "Unnamed Item"; // Default to "Unnamed Item" if null
     }
 
-    public void setItemname(String itemname) {
-        this.itemname = itemname;
+    public void setItemName(String itemName) {
+        this.itemname = itemName;
     }
 
-    public String getItemprice() {
-        return itemprice;
+    public String getItemPrice() {
+        return itemprice != null ? itemprice : "0.00"; // Default to "0.00" if null
     }
 
-    public void setItemprice(String itemprice) {
-        this.itemprice = itemprice;
+    public void setItemPrice(String itemPrice) {
+        this.itemprice = itemPrice;
     }
 
-    public String getItemqty() {
-        return itemqty;
+    public String getItemQty() {
+        return itemqty != null ? itemqty : "0"; // Default to "0" if null
     }
 
-    public void setItemqty(String itemqty) {
-        this.itemqty = itemqty;
+    public void setItemQty(String itemQty) {
+        this.itemqty = itemQty;
     }
 }

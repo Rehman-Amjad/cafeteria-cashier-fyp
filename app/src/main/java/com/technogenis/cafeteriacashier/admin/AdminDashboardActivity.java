@@ -1,10 +1,11 @@
-package com.technogenis.cafeteriacashier;
+package com.technogenis.cafeteriacashier.admin;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -17,48 +18,49 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.technogenis.cafeteriacashier.MyPreferenceManager;
+import com.technogenis.cafeteriacashier.R;
+import com.technogenis.cafeteriacashier.adapter.CustomerAdapter;
 import com.technogenis.cafeteriacashier.adapter.HistoryAdapter;
+import com.technogenis.cafeteriacashier.model.CustomerModel;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class AdminDashboardActivity extends AppCompatActivity {
 
-
-    TextView tvItemName,tvQty,tvPrice,tvType,tvBalance;
-
-    private  MyPreferenceManager preferenceManager;
+    private MyPreferenceManager preferenceManager;
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private HistoryAdapter mHistoryAdapter;
-    private List<HistoryModel> mDataList = new ArrayList<>();
+    private CustomerAdapter mHistoryAdapter;
+    private final List<CustomerModel> mDataList = new ArrayList<>();
     private DatabaseReference historyRef;
     private HistoryModel lastHistoryItem;
-
-    String rfid;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_admin_dashboard);
 
-        preferenceManager = MyPreferenceManager.getInstance(this);
-        rfid = preferenceManager.getString("rfid");
-        historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
+        historyRef = FirebaseDatabase.getInstance().getReference("customers");
+
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+
+        // Ensure that the status bar is visible
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 
         initUI();
         setupFirebaseListener();
+
 
     }
 
@@ -66,18 +68,10 @@ public class MainActivity extends AppCompatActivity {
         recyclerView =findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
 
-        tvItemName=findViewById(R.id.tvItemName);
-        tvQty=findViewById(R.id.tvQty);
-        tvPrice=findViewById(R.id.tvPrice);
-        tvType=findViewById(R.id.tvType);
-        tvBalance=findViewById(R.id.tvBalance);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mHistoryAdapter = new HistoryAdapter(this, mDataList);
+        mHistoryAdapter = new CustomerAdapter(this, mDataList);
         recyclerView.setAdapter(mHistoryAdapter);
     }
-
-
     private void setupFirebaseListener() {
         // Attach ValueEventListener to the reference
         historyRef.addValueEventListener(new ValueEventListener() {
@@ -86,31 +80,14 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // Clear the existing list before adding new items
                 mDataList.clear();
-                HistoryModel lastItem = null;
 
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HistoryModel history = snapshot.getValue(HistoryModel.class);
+                    CustomerModel history = snapshot.getValue(CustomerModel.class);
                     if (history != null) {
                         // Only add the item if it matches the RFID
-                        if (history.getCustomerRfid().equals(rfid)) {
-                            mDataList.add(history);
-                            lastItem = history;
-                        }
+                        mDataList.add(history);
                     }
                 }
-
-                // If we have a last item, store it in the global variable
-                if (lastItem != null) {
-                    lastHistoryItem = lastItem;
-                    tvItemName.setText(lastHistoryItem.getItemName());
-                    tvQty.setText("QTY: " + lastHistoryItem.getItemQty());
-                    tvPrice.setText("Price: RS " + lastHistoryItem.getItemPrice());
-                    tvType.setText("Type: " + lastHistoryItem.getCustomerPayment());
-                    tvBalance.setText("Balance: RS " + lastHistoryItem.getCustomerBalance());
-
-                    Log.d("LastItem", "Last item: " + lastHistoryItem.toString());
-                }
-
                 // Notify the adapter that data has changed
                 mHistoryAdapter.notifyDataSetChanged();
 
@@ -130,6 +107,4 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }

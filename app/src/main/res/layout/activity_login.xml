@@ -9,6 +9,7 @@
     android:layout_gravity="center"
     android:gravity="center"
     android:padding="20dp"
+    android:background="@color/white"
     tools:context=".LoginActivity">
 
     <TextView
@@ -28,7 +29,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/view_background"
         android:ems="10"
-        android:hint="Username"
+        android:hint="Enter RFID"
         android:drawablePadding="10dp"
         android:inputType="textPersonName"
         android:padding="15dp"
@@ -51,7 +52,7 @@
         android:textColor="@color/white"
         android:background="@drawable/view_background"
         android:inputType="textPassword"
-        android:hint="Password" />
+        android:hint="Enter Pin Code" />
 
 
 
@@ -63,6 +64,17 @@
         android:backgroundTint="@color/primaryColor"
         android:padding="15dp"
         android:text="LOGIN"
+        android:elevation="5dp"
+        app:cornerRadius="10dp" />
+
+    <Button
+        android:id="@+id/btnAdmin"
+        android:layout_width="220dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/teal_700"
+        android:padding="15dp"
+        android:text="Admin Login"
         android:elevation="5dp"
         app:cornerRadius="10dp" />
 
