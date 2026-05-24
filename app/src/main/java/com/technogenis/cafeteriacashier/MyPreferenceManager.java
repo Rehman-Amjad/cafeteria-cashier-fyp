@@ -14,8 +14,10 @@ public class MyPreferenceManager {
 
 
     private MyPreferenceManager(Context context) {
-        // Constructor implementation
-        preference = context.getSharedPreferences(Constant.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE);
+        Context appContext = context.getApplicationContext() != null
+                ? context.getApplicationContext()
+                : context;
+        preference = appContext.getSharedPreferences(Constant.KEY_PREFERENCE_NAME, Context.MODE_PRIVATE);
     }
 
     @SuppressLint("StaticFieldLeak")

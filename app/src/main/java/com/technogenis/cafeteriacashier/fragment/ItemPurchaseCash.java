@@ -1,13 +1,6 @@
 package com.technogenis.cafeteriacashier.fragment;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,106 +8,105 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.technogenis.cafeteriacashier.MyPreferenceManager;
 import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.adapter.HistoryAdapter;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
+import com.technogenis.cafeteriacashier.util.SafeParse;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ItemPurchaseCash extends Fragment {
 
-    private MyPreferenceManager preferenceManager;
+    private static final String PAYMENT_CASH = "Cash";
 
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private HistoryAdapter mHistoryAdapter;
+    private TextView tvTotal, tvEmpty;
+    private View root;
+    private HistoryAdapter mAdapter;
     private final List<HistoryModel> mDataList = new ArrayList<>();
-    private DatabaseReference historyRef;
-    private HistoryModel lastHistoryItem;
 
-    TextView tvTotal;
-
-    int totalPrice = 0;
-
-    String rfid;
+    private Query query;
+    private ValueEventListener listener;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // Initialize Firebase database reference
-        historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_item_purchase_cash, container, false);
-
-        preferenceManager = MyPreferenceManager.getInstance(getActivity());
-        rfid = preferenceManager.getString("rfid");
-
-        initUI(view);
-        setupFirebaseListener();
-
-        return view;
+        root = inflater.inflate(R.layout.fragment_item_purchase_cash, container, false);
+        recyclerView = root.findViewById(R.id.recyclerView);
+        progressBar = root.findViewById(R.id.progressBar);
+        tvTotal = root.findViewById(R.id.tvTotal);
+        tvEmpty = root.findViewById(R.id.tvEmpty);
+        return root;
     }
 
-    private void initUI(View view) {
-        recyclerView =view.findViewById(R.id.recyclerView);
-        progressBar = view.findViewById(R.id.progressBar);
-        tvTotal = view.findViewById(R.id.tvTotal);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView.setClipToPadding(false);
+        mAdapter = new HistoryAdapter(requireContext(), mDataList);
+        recyclerView.setAdapter(mAdapter);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mHistoryAdapter = new HistoryAdapter(getActivity(), mDataList);
-        recyclerView.setAdapter(mHistoryAdapter);
-    }
-    private void setupFirebaseListener() {
-        // Attach ValueEventListener to the reference
-        historyRef.addValueEventListener(new ValueEventListener() {
-            @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
+        final String rfid = MyPreferenceManager.getInstance(requireContext()).getString("rfid");
+        if (rfid == null || rfid.isEmpty()) return;
+
+        // Filter by the current customer's RFID server-side; client further restricts to Cash.
+        query = FirebaseDatabase.getInstance()
+                .getReference("buyitems")
+                .orderByChild("customerrfid")
+                .equalTo(rfid);
+
+        listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Clear the existing list before adding new items
+                int total = 0;
                 mDataList.clear();
-
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HistoryModel history = snapshot.getValue(HistoryModel.class);
-                    if (history != null) {
-                        // Only add the item if it matches the RFID
-                        if (history.getCustomerPayment().equals("Cash")) {
-                            totalPrice += Integer.parseInt(history.getItemPrice());
-                            mDataList.add(history);
-                        }
-                    }
+                    HistoryModel h = snapshot.getValue(HistoryModel.class);
+                    if (h == null) continue;
+                    if (!PAYMENT_CASH.equalsIgnoreCase(h.getCustomerPayment())) continue;
+                    total += SafeParse.parseIntOr(h.getItemPrice(), 0);
+                    mDataList.add(h);
                 }
-
-                tvTotal.setText("PKR "+ totalPrice);
-                // Notify the adapter that data has changed
-                mHistoryAdapter.notifyDataSetChanged();
-
-                // Hide progress bar and show RecyclerView once data is loaded
-                if (progressBar.getVisibility() == View.VISIBLE) {
-                    progressBar.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                }
+                tvTotal.setText(getString(R.string.label_currency_pkr) + " " + total);
+                mAdapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                tvEmpty.setVisibility(mDataList.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors if necessary
-                Log.e("FirebaseListener", "Database error: " + databaseError.getMessage());
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("PurchaseCash", "Query cancelled", error.toException());
                 progressBar.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                Snackbar.make(root, error.getMessage(), Snackbar.LENGTH_LONG).show();
             }
-        });
+        };
+        query.addValueEventListener(listener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (query != null && listener != null) {
+            query.removeEventListener(listener);
+        }
+        listener = null;
+        query = null;
+        super.onDestroyView();
     }
 }

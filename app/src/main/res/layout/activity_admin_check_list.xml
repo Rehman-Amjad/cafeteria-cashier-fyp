@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
-    android:background="@color/white"
+    android:background="?android:attr/colorBackground"
     tools:context=".admin.AdminCheckListActivity">
 
     <LinearLayout
@@ -14,61 +12,56 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:weightSum="5"
-        android:layout_gravity="center"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/tvQty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="QTY"
+            android:text="@string/label_qty"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="13sp"
             android:textAllCaps="true"
-            android:padding="8dp"
+            android:padding="12dp"
             android:layout_weight="1"
             android:gravity="center"
             android:background="@drawable/text_background_color" />
 
         <TextView
-            android:id="@+id/tvItemName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Name"
+            android:text="@string/label_name"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="13sp"
             android:textAllCaps="true"
-            android:padding="8dp"
+            android:padding="12dp"
             android:layout_weight="2"
             android:gravity="center"
             android:background="@drawable/text_background_color" />
 
         <TextView
-            android:id="@+id/tvPrice"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Price"
+            android:text="@string/label_price"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="13sp"
             android:textAllCaps="true"
-            android:padding="8dp"
+            android:padding="12dp"
             android:layout_weight="1"
             android:gravity="center"
             android:background="@drawable/text_background_color" />
 
         <TextView
-            android:id="@+id/tvDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Date"
+            android:text="@string/label_date"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:textSize="13sp"
             android:textAllCaps="true"
-            android:padding="8dp"
+            android:padding="12dp"
             android:layout_weight="1"
             android:gravity="center"
             android:background="@drawable/text_background_color" />
@@ -80,24 +73,31 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/ll_head"
         android:layout_above="@+id/ll_total"
-        android:orientation="vertical">
+        android:padding="8dp">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            android:clipToPadding="false" />
 
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
             android:layout_centerInParent="true"
-            android:visibility="visible"/>
+            android:visibility="visible" />
 
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/empty_history"
+            android:textColor="@color/emptyStateText"
+            android:textSize="15sp"
+            android:visibility="gone" />
     </RelativeLayout>
-
 
     <LinearLayout
         android:id="@+id/ll_total"
@@ -105,18 +105,17 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="2"
-        android:layout_alignParentBottom="true"
-        >
+        android:layout_alignParentBottom="true">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Total"
+            android:text="@string/label_total"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:textAllCaps="true"
-            android:padding="15dp"
+            android:padding="16dp"
             android:layout_weight="1"
             android:gravity="center"
             android:background="@drawable/text_background_color" />
@@ -125,12 +124,12 @@
             android:id="@+id/tvTotal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="PKR 0"
+            android:text="@string/placeholder_amount_zero"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:textSize="13sp"
+            android:textSize="14sp"
             android:textAllCaps="true"
-            android:padding="15dp"
+            android:padding="16dp"
             android:layout_weight="1"
             android:gravity="center"
             android:background="@drawable/text_background_color" />

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Semantic tokens (dark) — overrides for night mode -->
+    <color name="appBackground">#10110F</color>
+    <color name="appSurface">#1C1F1E</color>
+    <color name="onSurfacePrimary">#ECECEC</color>
+    <color name="onSurfaceSecondary">#B3B6B5</color>
+    <color name="dividerColor">#33FFFFFF</color>
+    <color name="emptyStateText">#88FFFFFF</color>
+</resources>

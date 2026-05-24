@@ -10,8 +10,11 @@ public class HistoryModel {
     String itemprice;
     String itemqty;
 
-    // Constructor with parameters
-    public HistoryModel(String id, String customerBalance, String customerPayment, String customerRfid, String itemName, String itemPrice, String itemqty) {
+    public HistoryModel() {
+    }
+
+    public HistoryModel(String id, String customerBalance, String customerPayment,
+                        String customerRfid, String itemName, String itemPrice, String itemqty) {
         this.Id = id;
         this.customerblance = customerBalance;
         this.customerpayment = customerPayment;
@@ -21,13 +24,8 @@ public class HistoryModel {
         this.itemqty = itemqty;
     }
 
-    // Default constructor
-    public HistoryModel() {
-    }
-
-    // Getters and Setters with default values for missing data
     public String getId() {
-        return Id != null ? Id : "N/A"; // Return "N/A" if Id is null
+        return Id;
     }
 
     public void setId(String id) {
@@ -35,7 +33,7 @@ public class HistoryModel {
     }
 
     public String getCustomerBalance() {
-        return customerblance != null ? customerblance : "0.00"; // Default to "0.00" if null
+        return customerblance != null ? customerblance : "0";
     }
 
     public void setCustomerBalance(String customerBalance) {
@@ -43,7 +41,7 @@ public class HistoryModel {
     }
 
     public String getCustomerPayment() {
-        return customerpayment != null ? customerpayment : "0.00"; // Default to "0.00" if null
+        return customerpayment != null ? customerpayment : "";
     }
 
     public void setCustomerPayment(String customerPayment) {
@@ -51,7 +49,7 @@ public class HistoryModel {
     }
 
     public String getCustomerRfid() {
-        return customerrfid != null ? customerrfid : "Unknown"; // Default to "Unknown" if null
+        return customerrfid != null ? customerrfid : "";
     }
 
     public void setCustomerRfid(String customerRfid) {
@@ -59,7 +57,7 @@ public class HistoryModel {
     }
 
     public String getItemName() {
-        return itemname != null ? itemname : "Unnamed Item"; // Default to "Unnamed Item" if null
+        return itemname != null ? itemname : "Unnamed Item";
     }
 
     public void setItemName(String itemName) {
@@ -67,7 +65,7 @@ public class HistoryModel {
     }
 
     public String getItemPrice() {
-        return itemprice != null ? itemprice : "0.00"; // Default to "0.00" if null
+        return itemprice != null ? itemprice : "0";
     }
 
     public void setItemPrice(String itemPrice) {
@@ -75,7 +73,7 @@ public class HistoryModel {
     }
 
     public String getItemQty() {
-        return itemqty != null ? itemqty : "0"; // Default to "0" if null
+        return itemqty != null ? itemqty : "0";
     }
 
     public void setItemQty(String itemQty) {

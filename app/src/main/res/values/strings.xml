@@ -1,7 +1,61 @@
 <resources>
     <string name="app_name">Cafeteria Cashier</string>
-
     <string name="splash_text">RFID Based Prepaid Card for Cafeteria Cashier System</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Login -->
+    <string name="title_login">Login</string>
+    <string name="hint_enter_rfid">Enter RFID</string>
+    <string name="hint_enter_pin">Enter PIN code</string>
+    <string name="action_login">Login</string>
+    <string name="action_admin_login">Admin Login</string>
+
+    <string name="error_enter_username">Please enter your RFID</string>
+    <string name="error_invalid_username">Invalid characters in RFID</string>
+    <string name="error_enter_pin">Please enter your PIN</string>
+    <string name="error_incorrect_username">Incorrect username</string>
+    <string name="error_incorrect_password">Incorrect password</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_account_misconfigured">Account misconfigured</string>
+    <string name="error_wrong_pin">Wrong PIN</string>
+
+    <!-- Splash -->
+    <string name="cd_app_logo">App logo</string>
+
+    <!-- Dashboard / drawer -->
+    <string name="cd_profile_avatar">Profile avatar</string>
+    <string name="cd_user_avatar">User avatar</string>
+    <string name="action_logout">Logout</string>
+    <string name="logout_done">Logged out</string>
+    <string name="confirm_logout_title">Logout</string>
+    <string name="confirm_logout_message">Are you sure you want to log out?</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_cancel">Cancel</string>
+
+    <!-- Home / lists -->
+    <string name="label_recent_buy_items">Recent Buy Items</string>
+    <string name="label_item_name">Item Name</string>
+    <string name="label_qty">QTY</string>
+    <string name="label_price">Price</string>
+    <string name="label_name">Name</string>
+    <string name="label_date">Date</string>
+    <string name="label_payment_via">Payment Via</string>
+    <string name="label_balance">Balance</string>
+    <string name="label_total">Total</string>
+    <string name="label_phone">Phone</string>
+    <string name="label_rfid">RFID</string>
+    <string name="label_currency_pkr">PKR</string>
+    <string name="placeholder_amount_zero">PKR 0</string>
+
+    <!-- Empty / error -->
+    <string name="empty_history">No purchases yet</string>
+    <string name="empty_customers">No customers found</string>
+    <string name="error_load_failed">Couldn\'t load data</string>
+    <string name="error_session_missing">Session expired. Please log in again.</string>
+    <string name="error_missing_customer">Customer not selected</string>
+
+    <!-- Drawer menu -->
+    <string name="nav_home">Home</string>
+    <string name="nav_purchase_history">Purchase History</string>
+    <string name="nav_cash_history">Cash Purchases</string>
+    <string name="nav_exit">Exit</string>
 </resources>

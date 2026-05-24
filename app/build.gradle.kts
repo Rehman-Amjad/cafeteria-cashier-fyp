@@ -44,9 +44,6 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
-    implementation (libs.picasso)
-    implementation (libs.recyclerview.selection)
-    implementation (libs.recyclerview)
-    implementation (libs.firebase.database)
-    implementation (libs.firebase.ui.database)
+    implementation(libs.recyclerview)
+    implementation(libs.firebase.database)
 }

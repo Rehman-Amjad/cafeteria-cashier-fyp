@@ -1,102 +1,96 @@
 package com.technogenis.cafeteriacashier.fragment;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.technogenis.cafeteriacashier.MyPreferenceManager;
 import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
 
-
 public class HomeFragment extends Fragment {
 
+    private TextView tvItemName, tvQty, tvPrice, tvType, tvBalance;
+    private View root;
 
-    TextView tvItemName,tvQty,tvPrice,tvType,tvBalance;
-    private DatabaseReference historyRef;
-
-    private MyPreferenceManager preferenceManager;
-    private HistoryModel lastHistoryItem;
-
-    String rfid;
+    private Query query;
+    private ValueEventListener listener;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
-
-        historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
-        preferenceManager = MyPreferenceManager.getInstance(getActivity());
-        rfid = preferenceManager.getString("rfid");
-
-        initView(view);
-
-       setupFirebaseListener();
-
-
-
-        return view;
+        root = inflater.inflate(R.layout.fragment_home, container, false);
+        tvItemName = root.findViewById(R.id.tvItemName);
+        tvQty = root.findViewById(R.id.tvQty);
+        tvPrice = root.findViewById(R.id.tvPrice);
+        tvType = root.findViewById(R.id.tvType);
+        tvBalance = root.findViewById(R.id.tvBalance);
+        return root;
     }
 
-    private void initView(View view) {
-        tvItemName=view.findViewById(R.id.tvItemName);
-        tvQty=view.findViewById(R.id.tvQty);
-        tvPrice=view.findViewById(R.id.tvPrice);
-        tvType=view.findViewById(R.id.tvType);
-        tvBalance=view.findViewById(R.id.tvBalance);
-    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        String rfid = MyPreferenceManager.getInstance(requireContext()).getString("rfid");
+        if (rfid == null || rfid.isEmpty()) {
+            // No session — outer activity will route to login on next resume.
+            return;
+        }
+        query = FirebaseDatabase.getInstance()
+                .getReference("buyitems")
+                .orderByChild("customerrfid")
+                .equalTo(rfid);
 
-    private void setupFirebaseListener() {
-        // Attach ValueEventListener to the reference
-        historyRef.addValueEventListener(new ValueEventListener() {
-            @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
+        listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Clear the existing list before adding new items
-                HistoryModel lastItem = null;
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HistoryModel history = snapshot.getValue(HistoryModel.class);
-                    if (history != null) {
-                        // Only add the item if it matches the RFID
-                        if (history.getCustomerRfid().equals(rfid)) {
-                            lastItem = history;
-                        }
-                    }
+                HistoryModel last = null;
+                for (DataSnapshot s : dataSnapshot.getChildren()) {
+                    HistoryModel h = s.getValue(HistoryModel.class);
+                    if (h != null) last = h;
                 }
-
-//                 If we have a last item, store it in the global variable
-                if (lastItem != null) {
-                    lastHistoryItem = lastItem;
-                    tvItemName.setText(lastHistoryItem.getItemName());
-                    tvQty.setText("QTY: " + lastHistoryItem.getItemQty());
-                    tvPrice.setText("Price: RS " + lastHistoryItem.getItemPrice());
-                    tvType.setText("Type: " + lastHistoryItem.getCustomerPayment());
-                    tvBalance.setText("Balance: RS " + lastHistoryItem.getCustomerBalance());
-
-                    Log.d("LastItem", "Last item: " + lastHistoryItem.toString());
+                if (last != null) {
+                    tvItemName.setText(last.getItemName());
+                    tvQty.setText(getString(R.string.label_qty) + ": " + last.getItemQty());
+                    tvPrice.setText(getString(R.string.label_price) + ": "
+                            + getString(R.string.label_currency_pkr) + " " + last.getItemPrice());
+                    tvType.setText(getString(R.string.label_payment_via) + ": " + last.getCustomerPayment());
+                    tvBalance.setText(getString(R.string.label_balance) + ": "
+                            + getString(R.string.label_currency_pkr) + " " + last.getCustomerBalance());
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors if necessary
-                Log.e("FirebaseListener", "Database error: " + databaseError.getMessage());
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("HomeFragment", "Query cancelled", error.toException());
+                if (root != null) {
+                    Snackbar.make(root, error.getMessage(), Snackbar.LENGTH_LONG).show();
+                }
             }
-        });
+        };
+        query.addValueEventListener(listener);
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (query != null && listener != null) {
+            query.removeEventListener(listener);
+        }
+        listener = null;
+        query = null;
+        super.onDestroyView();
     }
 }

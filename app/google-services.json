@@ -1,14 +1,14 @@
 {
   "project_info": {
-    "project_number": "1010565553972",
-    "firebase_url": "https://rfid-based-card-for-cafeteria-default-rtdb.firebaseio.com",
-    "project_id": "rfid-based-card-for-cafeteria",
-    "storage_bucket": "rfid-based-card-for-cafeteria.appspot.com"
+    "project_number": "964168016119",
+    "firebase_url": "https://cafeteriapayment-1503a-default-rtdb.firebaseio.com",
+    "project_id": "cafeteriapayment-1503a",
+    "storage_bucket": "cafeteriapayment-1503a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1010565553972:android:e35f52aab72605cf010f61",
+        "mobilesdk_app_id": "1:964168016119:android:e318ad6f2b22fa443eb3f2",
         "android_client_info": {
           "package_name": "com.technogenis.cafeteriacashier"
         }
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCkeAfMzKH-a1BS9K9SUvG9LWungloVGmQ"
+          "current_key": "AIzaSyBMB1jm3Uyf09Ov3Jsn0jNng3kIPQ_wOWk"
         }
       ],
       "services": {

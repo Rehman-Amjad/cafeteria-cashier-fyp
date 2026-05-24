@@ -1,49 +1,49 @@
 package com.technogenis.cafeteriacashier.admin;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.technogenis.cafeteriacashier.MyPreferenceManager;
 import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.adapter.HistoryAdapter;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
+import com.technogenis.cafeteriacashier.util.EdgeToEdgeHelper;
+import com.technogenis.cafeteriacashier.util.SafeParse;
 
 import java.util.ArrayList;
 import java.util.List;
+// Requires RTDB rules: { "buyitems": { ".indexOn": ["customerrfid"] } } — see RTDB_RULES.md
 
 public class AdminCheckListActivity extends AppCompatActivity {
 
-    private MyPreferenceManager preferenceManager;
-
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
+    private TextView tvTotal;
+    private TextView tvEmpty;
+    private View root;
     private HistoryAdapter mHistoryAdapter;
     private final List<HistoryModel> mDataList = new ArrayList<>();
-    private DatabaseReference historyRef;
-    private HistoryModel lastHistoryItem;
-    TextView tvTotal;
-    String rfid;
 
-    int totalPrice = 0;
+    private Query query;
+    private ValueEventListener listener;
+
+    private String rfid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,64 +51,75 @@ public class AdminCheckListActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_admin_check_list);
 
-        historyRef = FirebaseDatabase.getInstance().getReference("buyitems");
-
         Intent intent = getIntent();
-        rfid = intent.getStringExtra("rfid");
-
+        rfid = intent != null ? intent.getStringExtra("rfid") : null;
+        if (rfid == null || rfid.isEmpty()) {
+            Toast.makeText(this, R.string.error_missing_customer, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
         initUI();
-        setupFirebaseListener();
 
+        query = FirebaseDatabase.getInstance()
+                .getReference("buyitems")
+                .orderByChild("customerrfid")
+                .equalTo(rfid);
     }
 
     private void initUI() {
-        recyclerView =findViewById(R.id.recyclerView);
+        root = findViewById(R.id.main);
+        recyclerView = findViewById(R.id.recyclerView);
         progressBar = findViewById(R.id.progressBar);
         tvTotal = findViewById(R.id.tvTotal);
+        tvEmpty = findViewById(R.id.tvEmpty);
+
+        EdgeToEdgeHelper.applySystemBarsPadding(root, true, true);
+        recyclerView.setClipToPadding(false);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mHistoryAdapter = new HistoryAdapter(this, mDataList);
         recyclerView.setAdapter(mHistoryAdapter);
     }
-    private void setupFirebaseListener() {
-        // Attach ValueEventListener to the reference
-        historyRef.addValueEventListener(new ValueEventListener() {
-            @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (query == null) return;
+        listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Clear the existing list before adding new items
+                int total = 0;
                 mDataList.clear();
-
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    HistoryModel history = snapshot.getValue(HistoryModel.class);
-                    if (history != null) {
-                        // Only add the item if it matches the RFID
-                        if (history.getCustomerRfid().equals(rfid)) {
-                            totalPrice += Integer.parseInt(history.getItemPrice());
-                            mDataList.add(history);
-                        }
-                    }
+                    HistoryModel h = snapshot.getValue(HistoryModel.class);
+                    if (h == null) continue;
+                    total += SafeParse.parseIntOr(h.getItemPrice(), 0);
+                    mDataList.add(h);
                 }
-
-                tvTotal.setText("PKR "+ totalPrice);
-                // Notify the adapter that data has changed
+                tvTotal.setText(getString(R.string.label_currency_pkr) + " " + total);
                 mHistoryAdapter.notifyDataSetChanged();
-
-                // Hide progress bar and show RecyclerView once data is loaded
-                if (progressBar.getVisibility() == View.VISIBLE) {
-                    progressBar.setVisibility(View.GONE);
-                    recyclerView.setVisibility(View.VISIBLE);
-                }
+                progressBar.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
+                tvEmpty.setVisibility(mDataList.isEmpty() ? View.VISIBLE : View.GONE);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors if necessary
-                Log.e("FirebaseListener", "Database error: " + databaseError.getMessage());
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("AdminCheckList", "Query cancelled", error.toException());
                 progressBar.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                Snackbar.make(root, error.getMessage(), Snackbar.LENGTH_LONG).show();
             }
-        });
+        };
+        query.addValueEventListener(listener);
+    }
+
+    @Override
+    protected void onStop() {
+        if (query != null && listener != null) {
+            query.removeEventListener(listener);
+        }
+        listener = null;
+        super.onStop();
     }
 }

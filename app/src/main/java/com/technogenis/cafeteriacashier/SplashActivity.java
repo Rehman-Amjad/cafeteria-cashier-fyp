@@ -3,20 +3,23 @@ package com.technogenis.cafeteriacashier;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.technogenis.cafeteriacashier.util.EdgeToEdgeHelper;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int SPLASH_TIME_OUT = 5000;
-    TextView textView;
+    private static final long SPLASH_TIME_OUT = 1500L;
+
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable navigate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,22 +27,29 @@ public class SplashActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_splash);
 
-        textView=findViewById(R.id.textView);
+        View root = findViewById(R.id.main);
+        TextView textView = findViewById(R.id.textView);
 
-        Animation myanim= AnimationUtils.loadAnimation(this,R.anim.myanimation);
-//        gifImageView = findViewById(R.id.gifImageView);
-//        Glide.with(this)
-//                .asGif()
-//                .load(R.drawable.aquarium_one)
-//                .into(gifImageView);
+        EdgeToEdgeHelper.applySystemBarsPadding(root, true, true);
 
-        textView.setAnimation(myanim);
-        new Handler().postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
-            startActivity(intent);
+        Animation anim = AnimationUtils.loadAnimation(this, R.anim.myanimation);
+        textView.startAnimation(anim);
+
+        final MyPreferenceManager prefs = MyPreferenceManager.getInstance(this);
+        navigate = () -> {
+            String rfid = prefs.getString("rfid");
+            Intent next = (rfid != null && !rfid.isEmpty())
+                    ? new Intent(SplashActivity.this, DashboardActivity.class)
+                    : new Intent(SplashActivity.this, LoginActivity.class);
+            startActivity(next);
             finish();
-        }, SPLASH_TIME_OUT);
+        };
+        handler.postDelayed(navigate, SPLASH_TIME_OUT);
+    }
 
-
+    @Override
+    protected void onDestroy() {
+        if (navigate != null) handler.removeCallbacks(navigate);
+        super.onDestroy();
     }
 }

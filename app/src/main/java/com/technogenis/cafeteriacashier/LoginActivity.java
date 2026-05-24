@@ -1,33 +1,35 @@
 package com.technogenis.cafeteriacashier;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.technogenis.cafeteriacashier.admin.AdminDashboardActivity;
+import com.technogenis.cafeteriacashier.util.EdgeToEdgeHelper;
+import com.technogenis.cafeteriacashier.util.FirebasePathSanitizer;
 
 public class LoginActivity extends AppCompatActivity {
 
-    Button btnLogin,btnAdmin;
-    EditText etUserName,etUserPassword;
-    String username, password;
+    private static final String ADMIN_USERNAME = "admin";
+    private static final String ADMIN_PASSWORD = "admin";
+
+    private MaterialButton btnLogin, btnAdmin;
+    private EditText etUserName, etUserPassword;
+    private View root;
     private MyPreferenceManager preferenceManager;
 
     @Override
@@ -38,99 +40,107 @@ public class LoginActivity extends AppCompatActivity {
 
         preferenceManager = MyPreferenceManager.getInstance(this);
 
-        btnLogin=findViewById(R.id.btnLogin);
-        etUserName=findViewById(R.id.etUserName);
-        etUserPassword=findViewById(R.id.etUserPassword);
-        btnAdmin=findViewById(R.id.btnAdmin);
+        root = findViewById(R.id.main);
+        btnLogin = findViewById(R.id.btnLogin);
+        btnAdmin = findViewById(R.id.btnAdmin);
+        etUserName = findViewById(R.id.etUserName);
+        etUserPassword = findViewById(R.id.etUserPassword);
 
-        btnAdmin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username="admin";
-                String userpassword="admin";
+        EdgeToEdgeHelper.applySystemBarsPadding(root, true, true);
 
-                if (username.equals(etUserName.getText().toString()))
-                {
-                    if (userpassword.equals(etUserPassword.getText().toString()))
-                    {
-                        Intent intent=new Intent(LoginActivity.this, AdminDashboardActivity.class);
-                        startActivity(intent);
-                        finish();
-                    }
-                    else
-                    {
-                        etUserPassword.setError("incorrect Password");
-                        etUserPassword.requestFocus();
-                        etUserPassword.setText("");
-                    }
-                }
-                else
-                {
-                    etUserName.setError("incorrect username");
-                    etUserName.requestFocus();
-                    etUserName.setText("");
-                }
-            }
-        });
-
-        btnLogin.setOnClickListener(v -> {
-
-            username = etUserName.getText().toString().trim();
-            password = etUserPassword.getText().toString().trim();
-
-            if (username.isEmpty()) {
-                showError(etUserName, "Please enter your username");
-                return;
-            }
-
-            if (password.isEmpty()) {
-                showError(etUserPassword, "Please enter your password");
-                return;
-            }
-
-            handleLogin(username, password);
-         });
-
-
-
+        btnAdmin.setOnClickListener(v -> attemptAdminLogin());
+        btnLogin.setOnClickListener(v -> attemptCustomerLogin());
     }
 
-    private void handleLogin(String username, String password) {
+    private void attemptAdminLogin() {
+        String username = etUserName.getText().toString().trim();
+        String password = etUserPassword.getText().toString();
+
+        if (!ADMIN_USERNAME.equals(username)) {
+            showError(etUserName, getString(R.string.error_incorrect_username));
+            return;
+        }
+        if (!ADMIN_PASSWORD.equals(password)) {
+            showError(etUserPassword, getString(R.string.error_incorrect_password));
+            return;
+        }
+
+        startActivity(new Intent(this, AdminDashboardActivity.class));
+        finish();
+    }
+
+    private void attemptCustomerLogin() {
+        String username = etUserName.getText().toString().trim();
+        String password = etUserPassword.getText().toString();
+
+        if (username.isEmpty()) {
+            showError(etUserName, getString(R.string.error_enter_username));
+            return;
+        }
+        if (!FirebasePathSanitizer.isValid(username)) {
+            showError(etUserName, getString(R.string.error_invalid_username));
+            return;
+        }
+        if (password.isEmpty()) {
+            showError(etUserPassword, getString(R.string.error_enter_pin));
+            return;
+        }
+
+        setBusy(true);
+        handleLogin(username, password);
+    }
+
+    private void handleLogin(final String username, final String password) {
         DatabaseReference callRef = FirebaseDatabase.getInstance()
                 .getReference("customers")
                 .child(username);
 
-        callRef.addValueEventListener(new ValueEventListener() {
-            @SuppressLint("SetTextI18n")
+        callRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-
-                    String  checkPassword = snapshot.child("customerPin").getValue(String.class);
-
-                    assert checkPassword != null;
-                    if(checkPassword.equals(password)){
-                        preferenceManager.putString("rfid",etUserName.getText().toString().trim());
-                        startActivity(new Intent(LoginActivity.this,MainActivity.class));
-                    }else{
-                        Toast.makeText(LoginActivity.this,"Wrong Pin",Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(LoginActivity.this,"User not found",Toast.LENGTH_SHORT).show();
-                    Log.w("Firebase", "Data snapshot doesn't exist");
+                setBusy(false);
+                if (!snapshot.exists()) {
+                    Toast.makeText(LoginActivity.this,
+                            R.string.error_user_not_found, Toast.LENGTH_SHORT).show();
+                    return;
                 }
+                // FYP: PIN compared in plaintext against RTDB. See util/PinHash for an
+                // opt-in hashing helper to use once you migrate the DB.
+                String checkPassword = snapshot.child("customerPin").getValue(String.class);
+                if (checkPassword == null) {
+                    Toast.makeText(LoginActivity.this,
+                            R.string.error_account_misconfigured, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (!checkPassword.equals(password)) {
+                    Toast.makeText(LoginActivity.this,
+                            R.string.error_wrong_pin, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                preferenceManager.putString("rfid", username);
+                startActivity(new Intent(LoginActivity.this, DashboardActivity.class));
+                finish();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Firebase", "Data fetch cancelled", error.toException());
+                setBusy(false);
+                Log.e("LoginActivity", "Login query cancelled", error.toException());
+                Snackbar.make(root, error.getMessage(), Snackbar.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void setBusy(boolean busy) {
+        btnLogin.setEnabled(!busy);
+        btnAdmin.setEnabled(!busy);
+        etUserName.setEnabled(!busy);
+        etUserPassword.setEnabled(!busy);
     }
 
     private void showError(EditText field, String message) {
         field.setError(message);
         field.requestFocus();
-        field.setText("");
     }
 }

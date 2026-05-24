@@ -10,8 +10,18 @@
     <color name="Sky_Blue">#056A98</color>
 
     <color name="primaryColor">#23625C</color>
+    <color name="primaryColorDark">#184542</color>
+    <color name="primaryColorLight">#5E948E</color>
     <color name="Yellow">#FFC107</color>
     <color name="red">#F82A1A</color>
     <color name="Light_yellow">#E8C354</color>
     <color name="Light_green">#327535</color>
+
+    <!-- Semantic tokens (light) -->
+    <color name="appBackground">#F5F7F7</color>
+    <color name="appSurface">#FFFFFFFF</color>
+    <color name="onSurfacePrimary">#1A1C1B</color>
+    <color name="onSurfaceSecondary">#5A5F5E</color>
+    <color name="dividerColor">#1F000000</color>
+    <color name="emptyStateText">#88000000</color>
 </resources>

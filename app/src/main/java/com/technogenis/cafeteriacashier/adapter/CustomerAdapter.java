@@ -1,6 +1,5 @@
 package com.technogenis.cafeteriacashier.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -14,18 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.admin.AdminCheckListActivity;
 import com.technogenis.cafeteriacashier.model.CustomerModel;
-import com.technogenis.cafeteriacashier.model.HistoryModel;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
-public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.MyViewHolder>{
+public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.MyViewHolder> {
 
-
-    private Context context;
-    private List<CustomerModel> mDatalist;
+    private final Context context;
+    private final List<CustomerModel> mDatalist;
 
     public CustomerAdapter(Context context, List<CustomerModel> mDatalist) {
         this.context = context;
@@ -35,32 +29,24 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.MyView
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View myview= LayoutInflater.from(context).inflate(R.layout.customer_list,parent,false);
-
-
-        return new MyViewHolder(myview);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.customer_list, parent, false);
+        return new MyViewHolder(v);
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-
         CustomerModel model = mDatalist.get(position);
-
-
         holder.tv_name.setText(model.getCustomerName());
         holder.tv_phone.setText(model.getCustomerPhone());
         holder.tv_rfid.setText(model.getCustomerRfid());
 
-//        holder.tvBalance.setText("Balance: RS " + model.getCustomerBalance());
-
         holder.itemView.setOnClickListener(v -> {
+            String rfid = model.getCustomerRfid();
+            if (rfid == null || rfid.isEmpty()) return;
             Intent intent = new Intent(context, AdminCheckListActivity.class);
-            intent.putExtra("rfid",model.getCustomerRfid());
+            intent.putExtra("rfid", rfid);
             context.startActivity(intent);
         });
-
-
     }
 
     @Override
@@ -68,18 +54,14 @@ public class CustomerAdapter extends RecyclerView.Adapter<CustomerAdapter.MyView
         return mDatalist.size();
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder{
+    static class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView tv_name, tv_phone, tv_rfid;
 
-        TextView tv_name,tv_phone,tv_rfid;
-
-
-        public MyViewHolder(@NonNull View itemView) {
+        MyViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            tv_name=itemView.findViewById(R.id.tv_name);
-            tv_phone=itemView.findViewById(R.id.tv_phone);
-            tv_rfid=itemView.findViewById(R.id.tv_rfid);
-//            tvBalance=itemView.findViewById(R.id.tvBalance);
+            tv_name = itemView.findViewById(R.id.tv_name);
+            tv_phone = itemView.findViewById(R.id.tv_phone);
+            tv_rfid = itemView.findViewById(R.id.tv_rfid);
         }
     }
 }
