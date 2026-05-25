@@ -23,9 +23,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.technogenis.cafeteriacashier" />
-                  <option name="mobileSdkAppId" value="1:1010565553972:android:e35f52aab72605cf010f61" />
-                  <option name="projectId" value="rfid-based-card-for-cafeteria" />
-                  <option name="projectNumber" value="1010565553972" />
+                  <option name="mobileSdkAppId" value="1:964168016119:android:e318ad6f2b22fa443eb3f2" />
+                  <option name="projectId" value="cafeteriapayment-1503a" />
+                  <option name="projectNumber" value="964168016119" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
