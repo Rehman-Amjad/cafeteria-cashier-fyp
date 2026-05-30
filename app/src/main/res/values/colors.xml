@@ -24,4 +24,6 @@
     <color name="onSurfaceSecondary">#5A5F5E</color>
     <color name="dividerColor">#1F000000</color>
     <color name="emptyStateText">#88000000</color>
+    <color name="lowBalanceBg">#FDECEA</color>
+    <color name="lowBalanceText">#B3261E</color>
 </resources>
