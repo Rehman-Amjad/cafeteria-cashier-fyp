@@ -53,3 +53,5 @@ public class SplashActivity extends AppCompatActivity {
         super.onDestroy();
     }
 }
+
+
