@@ -11,19 +11,23 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.technogenis.cafeteriacashier.R;
 import com.technogenis.cafeteriacashier.adapter.HistoryAdapter;
 import com.technogenis.cafeteriacashier.model.HistoryModel;
+import com.technogenis.cafeteriacashier.util.AdminStats;
 import com.technogenis.cafeteriacashier.util.EdgeToEdgeHelper;
+import com.technogenis.cafeteriacashier.util.HomeFormat;
 import com.technogenis.cafeteriacashier.util.SafeParse;
 
 import java.util.ArrayList;
@@ -40,8 +44,12 @@ public class AdminCheckListActivity extends AppCompatActivity {
     private HistoryAdapter mHistoryAdapter;
     private final List<HistoryModel> mDataList = new ArrayList<>();
 
+    private TextView tvCustName, tvCustBalance, tvCustSpent, tvCustOrders, tvCustSplit;
+
     private Query query;
     private ValueEventListener listener;
+    private DatabaseReference customerRef;
+    private ValueEventListener customerListener;
 
     private String rfid;
 
@@ -74,7 +82,16 @@ public class AdminCheckListActivity extends AppCompatActivity {
         tvTotal = findViewById(R.id.tvTotal);
         tvEmpty = findViewById(R.id.tvEmpty);
 
-        EdgeToEdgeHelper.applySystemBarsPadding(root, true, true);
+        Toolbar toolbar = findViewById(R.id.Toolbar);
+        EdgeToEdgeHelper.applySystemBarsPadding(toolbar, true, false, false, true);
+        toolbar.setNavigationOnClickListener(v -> finish());
+
+        tvCustName = findViewById(R.id.tvCustName);
+        tvCustBalance = findViewById(R.id.tvCustBalance);
+        tvCustSpent = findViewById(R.id.tvCustSpent);
+        tvCustOrders = findViewById(R.id.tvCustOrders);
+        tvCustSplit = findViewById(R.id.tvCustSplit);
+
         recyclerView.setClipToPadding(false);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -91,13 +108,28 @@ public class AdminCheckListActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 int total = 0;
                 mDataList.clear();
+                List<HistoryModel> all = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     HistoryModel h = snapshot.getValue(HistoryModel.class);
                     if (h == null) continue;
                     total += SafeParse.parseIntOr(h.getItemPrice(), 0);
                     mDataList.add(h);
+                    all.add(h);
                 }
-                tvTotal.setText(getString(R.string.label_currency_pkr) + " " + total);
+                String pkr = getString(R.string.label_currency_pkr) + " ";
+                tvTotal.setText(pkr + total);
+
+                int[] split = AdminStats.cardCashSplit(all);
+                java.util.Map<String, Integer> bal = AdminStats.latestBalanceByRfid(all);
+                Integer balance = bal.get(rfid);
+                tvCustBalance.setText(getString(R.string.label_balance) + ": " + pkr
+                        + HomeFormat.groupedAmount(balance != null ? balance : 0));
+                tvCustSpent.setText(getString(R.string.stat_total_spent) + ": " + pkr
+                        + HomeFormat.groupedAmount(total));
+                tvCustOrders.setText(getString(R.string.stat_orders) + ": " + all.size());
+                tvCustSplit.setText(getString(R.string.stat_card_cash) + ": "
+                        + split[0] + "/" + split[1]);
+
                 mHistoryAdapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
@@ -112,6 +144,21 @@ public class AdminCheckListActivity extends AppCompatActivity {
             }
         };
         query.addValueEventListener(listener);
+
+        customerRef = FirebaseDatabase.getInstance().getReference("customers").child(rfid);
+        customerListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String name = snapshot.child("customername").getValue(String.class);
+                tvCustName.setText(name != null && !name.isEmpty() ? name : rfid);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                tvCustName.setText(rfid);
+            }
+        };
+        customerRef.addValueEventListener(customerListener);
     }
 
     @Override
@@ -119,7 +166,11 @@ public class AdminCheckListActivity extends AppCompatActivity {
         if (query != null && listener != null) {
             query.removeEventListener(listener);
         }
+        if (customerRef != null && customerListener != null) {
+            customerRef.removeEventListener(customerListener);
+        }
         listener = null;
+        customerListener = null;
         super.onStop();
     }
 }
