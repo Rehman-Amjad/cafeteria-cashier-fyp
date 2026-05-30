@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menuAdminOverview"
+        android:icon="@drawable/home"
+        android:title="@string/nav_overview" />
+
+    <item android:id="@+id/menuAdminCustomers"
+        android:icon="@drawable/card"
+        android:title="@string/nav_customers" />
+
+    <item android:id="@+id/menuAdminReports"
+        android:icon="@drawable/cash"
+        android:title="@string/nav_reports" />
+
+    <item android:id="@+id/menuAdminLogout"
+        android:icon="@drawable/ic_logout"
+        android:title="@string/action_logout" />
+
+    <item android:id="@+id/menuAdminExit"
+        android:icon="@drawable/ic_switch"
+        android:title="@string/nav_exit" />
+
+</menu>
