@@ -72,4 +72,21 @@
     <string name="nav_purchase_history">Purchase History</string>
     <string name="nav_cash_history">Cash Purchases</string>
     <string name="nav_exit">Exit</string>
+
+    <!-- Admin dashboard -->
+    <string name="admin_title">Admin Dashboard</string>
+    <string name="nav_overview">Overview</string>
+    <string name="nav_customers">Customers</string>
+    <string name="nav_reports">Reports</string>
+    <string name="stat_total_customers">Customers</string>
+    <string name="stat_revenue">Revenue</string>
+    <string name="stat_transactions">Transactions</string>
+    <string name="stat_today_sales">Today\'s Sales</string>
+    <string name="hint_search_customers">Search by name or RFID</string>
+    <string name="sort_by_revenue">By Revenue</string>
+    <string name="sort_by_qty">By Qty</string>
+    <string name="label_sold">Sold</string>
+    <string name="label_revenue">Revenue</string>
+    <string name="empty_items_sold">No sales yet</string>
+    <string name="title_customer_detail">Customer</string>
 </resources>
