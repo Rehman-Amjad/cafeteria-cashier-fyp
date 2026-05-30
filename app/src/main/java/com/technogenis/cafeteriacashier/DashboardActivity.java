@@ -28,6 +28,7 @@ public class DashboardActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navMenu;
     private Toolbar toolbar;
+    private ActionBarDrawerToggle toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +52,13 @@ public class DashboardActivity extends AppCompatActivity {
             swapFragment(new HomeFragment());
         }
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+        getSupportFragmentManager().addOnBackStackChangedListener(this::syncToolbarIndicator);
+        toggle.setToolbarNavigationClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         applyDrawerHeader();
 
@@ -65,6 +69,8 @@ public class DashboardActivity extends AppCompatActivity {
             public void handleOnBackPressed() {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
+                } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    getSupportFragmentManager().popBackStack();
                 } else {
                     finish();
                 }
@@ -84,14 +90,23 @@ public class DashboardActivity extends AppCompatActivity {
         }
     }
 
+    private void syncToolbarIndicator() {
+        boolean atRoot = getSupportFragmentManager().getBackStackEntryCount() == 0;
+        toggle.setDrawerIndicatorEnabled(atRoot);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(!atRoot);
+        }
+    }
+
     private boolean onDrawerItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.menuHome) {
-            swapFragment(new HomeFragment());
+            getSupportFragmentManager()
+                    .popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else if (id == R.id.menuItemPurchase) {
-            swapFragment(new ItemsPurchaseHistory());
+            swapSubFragment(new ItemsPurchaseHistory());
         } else if (id == R.id.menuItemPurchaseCash) {
-            swapFragment(new ItemPurchaseCash());
+            swapSubFragment(new ItemPurchaseCash());
         } else if (id == R.id.menu_logout) {
             confirmLogout();
         } else if (id == R.id.menuExit) {
@@ -101,10 +116,24 @@ public class DashboardActivity extends AppCompatActivity {
         return true;
     }
 
+    /** Opens the full purchase-history list (back-stack aware) and syncs the drawer item. */
+    public void showPurchaseHistory() {
+        swapSubFragment(new ItemsPurchaseHistory());
+        navMenu.setCheckedItem(R.id.menuItemPurchase);
+    }
+
     private void swapFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.main_frame, fragment)
+                .commit();
+    }
+
+    private void swapSubFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.main_frame, fragment)
+                .addToBackStack(null)
                 .commit();
     }
 
