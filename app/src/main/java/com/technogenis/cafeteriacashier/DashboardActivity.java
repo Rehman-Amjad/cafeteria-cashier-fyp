@@ -9,7 +9,6 @@ import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -28,7 +27,6 @@ public class DashboardActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navMenu;
     private Toolbar toolbar;
-    private ActionBarDrawerToggle toggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +50,19 @@ public class DashboardActivity extends AppCompatActivity {
             swapFragment(new HomeFragment());
         }
 
-        toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        // Toolbar navigation icon is managed explicitly (not via ActionBarDrawerToggle):
+        // the toggle's single morphing icon reverts to a hamburger when the drawer's
+        // close animation finishes, so on sub-screens we set the back arrow ourselves.
+        toolbar.setNavigationOnClickListener(v -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getOnBackPressedDispatcher().onBackPressed();
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
 
         getSupportFragmentManager().addOnBackStackChangedListener(this::syncToolbarIndicator);
-        toggle.setToolbarNavigationClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        syncToolbarIndicator();
 
         applyDrawerHeader();
 
@@ -92,10 +96,9 @@ public class DashboardActivity extends AppCompatActivity {
 
     private void syncToolbarIndicator() {
         boolean atRoot = getSupportFragmentManager().getBackStackEntryCount() == 0;
-        toggle.setDrawerIndicatorEnabled(atRoot);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(!atRoot);
-        }
+        toolbar.setNavigationIcon(atRoot ? R.drawable.ic_menu : R.drawable.ic_arrow_back);
+        toolbar.setNavigationContentDescription(
+                atRoot ? R.string.cd_open_menu : R.string.cd_go_back);
     }
 
     private boolean onDrawerItemSelected(@NonNull MenuItem item) {

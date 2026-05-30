@@ -57,6 +57,8 @@
     <string name="stat_orders">Orders</string>
     <string name="stat_card_cash">Card / Cash</string>
     <string name="low_balance_warning">⚠ Low balance — please top up soon.</string>
+    <string name="cd_open_menu">Open navigation menu</string>
+    <string name="cd_go_back">Go back</string>
 
     <!-- Empty / error -->
     <string name="empty_history">No purchases yet</string>
